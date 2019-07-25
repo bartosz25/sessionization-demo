@@ -27,6 +27,7 @@ object Visit {
 
 }
 
+
 class StructBuilder() {
 
   private var structFields = Array.empty[StructField]
@@ -59,6 +60,7 @@ object fields {
   def long = baseField(LongType) _
   def integer = baseField(IntegerType) _
   def double = baseField(DoubleType) _
+  def boolean = baseField(BooleanType) _
 
   def newStruct = new StructBuilder()
 

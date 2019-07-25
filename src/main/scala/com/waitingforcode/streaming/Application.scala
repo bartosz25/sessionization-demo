@@ -1,5 +1,6 @@
 package com.waitingforcode.streaming
 
+import com.waitingforcode.core.SessionOutput
 import org.apache.spark.sql.streaming.GroupStateTimeout
 import org.apache.spark.sql.{Dataset, SparkSession}
 
@@ -33,7 +34,7 @@ object Application {
 
 object BatchWriter {
 
-  def writeBatch(batchDataset: Dataset[Option[String]], batchId: Long) = {
+  def writeBatch(batchDataset: Dataset[Option[Seq[SessionOutput]]], batchId: Long) = {
     batchDataset.filter(state => state.isDefined)
       .write
       .partitionBy("ww") // TODO: add a suffixed partition column to avoid uneven distribution
