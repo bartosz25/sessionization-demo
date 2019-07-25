@@ -7,7 +7,7 @@ import org.apache.spark.sql.streaming.GroupState
 object Mapping {
 
   def mapStreamingLogsToSessions(key: String, logs: Iterator[Row],
-                                 currentState: GroupState[SessionIntermediaryState]): Option[Seq[SessionOutput]] = {
+                                 currentState: GroupState[SessionIntermediaryState]): Option[Iterator[SessionOutput]] = {
     if (currentState.hasTimedOut) {
       Some(currentState.get.toSessionOutputState)
     } else {

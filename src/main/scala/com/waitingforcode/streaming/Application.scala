@@ -7,6 +7,8 @@ import org.apache.spark.sql.{Dataset, SparkSession}
 object Application {
 
   def main(args: Array[String]): Unit = {
+    val outputDir = args(0)
+
     val sparkSession = SparkSession.builder()
       .appName("Sessionization-demo: streaming approach").master("local[*]").getOrCreate()
     import sparkSession.implicits._
@@ -25,7 +27,7 @@ object Application {
       .groupByKey(row => row.getAs[String]("key"))
       .mapGroupsWithState(timeoutConf = GroupStateTimeout.EventTimeTimeout())(Mapping.mapStreamingLogsToSessions)
 
-    val writeQuery = query.writeStream.foreachBatch(BatchWriter.writeBatch _).start()
+    val writeQuery = query.writeStream.foreachBatch(BatchWriter.writeBatch(outputDir) _).start()
 
     writeQuery.awaitTermination()
   }
@@ -34,11 +36,12 @@ object Application {
 
 object BatchWriter {
 
-  def writeBatch(batchDataset: Dataset[Option[Seq[SessionOutput]]], batchId: Long) = {
+  def writeBatch(outputDir: String)(batchDataset: Dataset[Option[Iterator[SessionOutput]]], batchId: Long) = {
     batchDataset.filter(state => state.isDefined)
       .write
-      .partitionBy("ww") // TODO: add a suffixed partition column to avoid uneven distribution
-      .json("/tmp/xxx")
+      // TODO: add a suffixed partition column to avoid uneven distribution?
+      .partitionBy("year, month, day, hour")
+      .json(outputDir)
   }
 
 }

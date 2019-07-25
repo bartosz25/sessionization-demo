@@ -1,6 +1,5 @@
 package com.waitingforcode.batch
 
-import com.waitingforcode.core.SessionIntermediaryState
 import org.apache.spark.sql.SparkSession
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 
@@ -9,7 +8,6 @@ class DataLoaderTest extends FlatSpec with Matchers with BeforeAndAfterAll {
 
   override def beforeAll(): Unit = {
     val Xsessions = Seq(
-      activeSession(1L), inactiveSession(2L), activeSession(3L)
     )
   }
 
@@ -29,11 +27,5 @@ class DataLoaderTest extends FlatSpec with Matchers with BeforeAndAfterAll {
   }
 
 
-  def activeSession = intermediarySession(true)
-  def inactiveSession = intermediarySession(false)
-
-  def intermediarySession(active: Boolean)(userId: Long): SessionIntermediaryState = {
-
-  }
 
 }
