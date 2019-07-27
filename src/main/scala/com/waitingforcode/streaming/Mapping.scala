@@ -6,15 +6,18 @@ import org.apache.spark.sql.streaming.GroupState
 
 object Mapping {
 
-  def mapStreamingLogsToSessions(key: String, logs: Iterator[Row],
+  def mapStreamingLogsToSessions(timeoutDurationMs: Long)(key: String, logs: Iterator[Row],
                                  currentState: GroupState[SessionIntermediaryState]): Option[Iterator[SessionOutput]] = {
     if (currentState.hasTimedOut) {
       Some(currentState.get.toSessionOutputState)
     } else {
-      val newState = currentState.getOption.map(state => state.updateWithNewLogs(logs))
-        .getOrElse(SessionIntermediaryState.createNew(logs))
+      val newState = currentState.getOption.map(state => state.updateWithNewLogs(logs, timeoutDurationMs))
+        .getOrElse(SessionIntermediaryState.createNew(logs, timeoutDurationMs))
       currentState.update(newState)
-      // TODO: handle state expiration here
+      // TODO: talk about different possibilities to configure the timeout; here we're using event-time based but
+      //       you can also use processing time-based;
+      // TODO: talk also about what it involves
+      currentState.setTimeoutTimestamp(newState.expirationTimeMillisUtc)
       None
     }
   }

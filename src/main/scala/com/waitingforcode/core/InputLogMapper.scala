@@ -1,11 +1,10 @@
 package com.waitingforcode.core
 
+import java.time.ZonedDateTime
+
 import org.apache.spark.sql.Row
 
 object InputLogMapper {
-
-  // TODO: replace it with a constant or more intelligent object
-  def visitId(log: Row): Long = log.getAs[Long]("visit_id")
 
   def userId(log: Row): Long = log.getAs[Long]("user_id")
 
@@ -14,8 +13,20 @@ object InputLogMapper {
   def currentPage(log: Row): String = page(log).getAs[String]("current")
 
   def eventTime(log: Row): Long = {
-    log.getAs[String]("event_time") // TODO: need to parse it into a milliseconds
-    0L
+    val eventTime = ZonedDateTime.parse(log.getAs[String]("event_time"))
+    eventTime.toInstant.toEpochMilli
   }
+
+  private def technical(log: Row): Row = log.getAs[Row]("technical")
+
+  def browser(log: Row): String = technical(log).getAs[String]("browser")
+
+  def language(log: Row): String = technical(log).getAs[String]("lang")
+
+  private def source(log: Row) = log.getAs[Row]("source")
+
+  def site(log: Row): String = source(log).getAs[String]("site")
+
+  def apiVersion(log: Row): String = source(log).getAs[String]("apiVersion")
 
 }

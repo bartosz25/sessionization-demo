@@ -12,7 +12,8 @@ class DataLoaderTest extends FlatSpec with Matchers with BeforeAndAfterAll {
   }
 
   private val TestSparkSession = SparkSession.builder()
-      .appName("DataLoaderTest").getOrCreate()
+    .master("local[*]")
+    .appName("DataLoaderTest").getOrCreate()
 
   behavior of "loading previous window sessions"
 
