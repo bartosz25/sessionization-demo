@@ -40,7 +40,7 @@ object Application {
       // TODO: I'm using here the watermark of the input. I'm not sure how it will behave with the state expiration?
       //       ^----- to solve that issue, add a blog post and show it as an image
       //              source for timestamp column: https://stackoverflow.com/questions/54298251/how-to-include-kafka-timestamp-value-as-columns-in-spark-structured-streaming
-      .withWatermark("timestamp", "3 minutes")
+      .withWatermark("timestamp", "5 seconds") // "3 minutes")
       .groupByKey(row => row.getAs[Long]("user_id"))
       // FlatMapGroupsWithState org.apache.spark.sql.KeyValueGroupedDataset$$Lambda$1050/441021062@384472bf, cast(value#26 as string).toString, createexternalrow(key#21.toString, value#22.toString, StructField(key,StringType,true), StructField(value,StringType,true)), [value#26], [key#21, value#22], obj#36: scala.Option, class[userId[0]: bigint, visitedPages[0]: array<struct<eventTime:bigint,pageName:string>>, browser[0]: string, language[0]: string, site[0]: string, apiVersion[0]: string, expirationTimeMillisUtc[0]: bigint, isActive[0]: boolean], Update, true, EventTimeTimeout
       //+- AppendColumns com.waitingforcode.streaming.Application$$$Lambda$984/48042118@18d30e7, interface org.apache.spark.sql.Row, [StructField(key,StringType,true), StructField(value,StringType,true)], createexternalrow(key#21.toString, value#22.toString, StructField(key,StringType,true), StructField(value,StringType,true)), [staticinvoke(class org.apache.spark.unsafe.types.UTF8String, StringType, fromString, input[0, java.lang.String, true], true, false) AS value#26]

@@ -46,6 +46,7 @@ object Mapping {
       //	at com.waitingforcode.streaming.Application$.$anonfun$main$2$adapted(Application.scala:58)
       //	at org.apache.spark.sql.KeyValueGroupedDataset.$anonfun$mapGroupsWithState$2(KeyValueGroupedDataset.scala:279)
       //       It was for: .withWatermark("timestamp", "3 minutes") AND currentState.setTimeoutTimestamp(newState.expirationTimeMillisUtc)
+      //  TODO: figure out what does this relationship involve?
       currentState.get
     }
   }
