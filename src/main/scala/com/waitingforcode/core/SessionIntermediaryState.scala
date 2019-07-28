@@ -23,11 +23,13 @@ case class SessionIntermediaryState(userId: Long, visitedPages: Seq[VisitedPage]
       expirationTimeMillisUtc = SessionIntermediaryState.getTimeout(newVisitedPages.last.eventTime, timeoutDurationMs))
   }
 
-  def toSessionOutputState: Iterator[SessionOutput] = {
+  def expire = this.copy(isActive = false)
+
+  def toSessionOutputState: Seq[SessionOutput] = {
     visitedPages.tails.collect {
       case Seq(firstVisit, secondVisit, _*) => firstVisit.toSessionOutput(this, Some(secondVisit))
       case Seq(firstVisit) => firstVisit.toSessionOutput(this, None)
-    }
+    }.toSeq
   }
 
 }

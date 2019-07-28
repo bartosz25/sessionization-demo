@@ -7,7 +7,7 @@ object Visit {
   val Schema = new StructBuilder()
     .withRequiredFields(
       Map(
-        "visit_id" -> fields.long, "user_id" -> fields.integer, "event_time" -> fields.string,
+        "user_id" -> fields.long, "event_time" -> fields.string,
         "page" -> fields.newStruct.withRequiredFields(Map("current" -> fields.string))
           .withOptionalFields(Map("previous" -> fields.string)).toField,
         "source" -> fields.newStruct.withRequiredFields(Map(

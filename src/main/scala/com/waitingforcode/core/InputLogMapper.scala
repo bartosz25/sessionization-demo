@@ -13,9 +13,11 @@ object InputLogMapper {
   def currentPage(log: Row): String = page(log).getAs[String]("current")
 
   def eventTime(log: Row): Long = {
-    val eventTime = ZonedDateTime.parse(log.getAs[String]("event_time"))
+    val eventTime = ZonedDateTime.parse(eventTimeString(log))
     eventTime.toInstant.toEpochMilli
   }
+
+  def eventTimeString(log: Row): String = log.getAs[String]("event_time")
 
   private def technical(log: Row): Row = log.getAs[Row]("technical")
 
@@ -27,6 +29,6 @@ object InputLogMapper {
 
   def site(log: Row): String = source(log).getAs[String]("site")
 
-  def apiVersion(log: Row): String = source(log).getAs[String]("apiVersion")
+  def apiVersion(log: Row): String = source(log).getAs[String]("api_version")
 
 }
