@@ -65,6 +65,16 @@ object SessionIntermediaryState {
 
   object Mapper {
     def userId(session: Row) = session.getAs[Long]("userId")
+    def browser(session: Row): String = session.getAs[String]("browser")
+    def language(session: Row): String = session.getAs[String]("language")
+    def site(session: Row): String = session.getAs[String]("site")
+    def apiVersion(session: Row): String = session.getAs[String]("apiVersion")
+    def expirationTimeMillisUtc(session: Row): Long = session.getAs[Long]("expirationTimeMillisUtc")
+    def visitedPages(session: Row): Seq[VisitedPage] = {
+      Option(session.getAs[Seq[Row]]("visitedPages")).map(pages => pages.map(row => VisitedPage(
+        row.getAs[Long]("eventTime"), row.getAs[String]("pageName")
+      ))).getOrElse(Seq.empty)
+    }
   }
 
   def createNew(logs: Iterator[Row], timeoutDurationMs: Long): SessionIntermediaryState = {
@@ -80,10 +90,21 @@ object SessionIntermediaryState {
     )
   }
 
+  // TODO: apparently we could use Encoders somewhere in the code but I've just read that it's dangerous to use
+  //       see that comment: https://stackoverflow.com/a/32347699/9726075
+  def restoreFromRow(row: Row, isActive: Boolean = true) = {
+    SessionIntermediaryState(
+      userId = Mapper.userId(row), browser = Mapper.browser(row), language = Mapper.language(row),
+      site = Mapper.site(row), apiVersion = Mapper.apiVersion(row),
+      expirationTimeMillisUtc = Mapper.expirationTimeMillisUtc(row),
+      isActive = isActive, visitedPages = Mapper.visitedPages(row)
+    )
+  }
+
   private def getTimeout(eventTime: Long, timeoutDurationMs: Long) = eventTime + timeoutDurationMs
 
   private[core] def mapInputLogsToVisitedPages(logs: Seq[Row]): Seq[VisitedPage] =
-    logs.map(log => VisitedPage.fromInputLog(log)).toSeq.sortBy(visitedPage => visitedPage.eventTime)
+    logs.map(log => VisitedPage.fromInputLog(log)).sortBy(visitedPage => visitedPage.eventTime)
 
   val Schema = new StructBuilder()
     .withRequiredFields(Map(
@@ -93,6 +114,8 @@ object SessionIntermediaryState {
           Map("eventTime" -> fields.long, "pageName" -> fields.string)
         ).buildSchema, nullableContent = false
       ),
+      "browser" -> fields.string, "language" -> fields.string, "site" -> fields.string, "apiVersion" -> fields.string,
+      "expirationTimeMillisUtc" -> fields.long,
       "isActive" -> fields.boolean
     )).buildSchema
 
