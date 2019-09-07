@@ -2,9 +2,9 @@ package com.waitingforcode.streaming
 
 import java.util.concurrent.TimeUnit
 
-import com.waitingforcode.core.{BatchWriter, Visit}
+import com.waitingforcode.core.{BatchWriter, SessionIntermediaryState, Visit}
 import org.apache.spark.sql.streaming.{GroupStateTimeout, OutputMode}
-import org.apache.spark.sql.{SparkSession, functions}
+import org.apache.spark.sql.{Dataset, SparkSession, functions}
 
 object Application {
 
@@ -34,7 +34,7 @@ object Application {
 
     val writeQuery = query.writeStream.outputMode(OutputMode.Update())
       .option("checkpointLocation", s"/tmp/sessionization-demo-streaming/checkpoint")
-      .foreachBatch((dataset, batchId) => {
+      .foreachBatch((dataset: Dataset[SessionIntermediaryState], batchId: Long) => {
         BatchWriter.writeDataset(dataset, s"${outputDir}/${batchId}")
       }).start()
 
