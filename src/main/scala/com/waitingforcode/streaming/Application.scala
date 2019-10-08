@@ -35,10 +35,10 @@ object Application {
       .load()
 
     val sessionTimeout = TimeUnit.MINUTES.toMillis(5)
-    val query = dataFrame.selectExpr("CAST(value AS STRING)", "timestamp")
-      .select(functions.from_json($"value", Visit.Schema).as("data"), $"timestamp")
-      .select($"data.*", $"timestamp")
-      .withWatermark("timestamp", "3 minutes")
+    val query = dataFrame.selectExpr("CAST(value AS STRING)")
+      .select(functions.from_json($"value", Visit.Schema).as("data"))
+      .select($"data.*")
+      .withWatermark("event_time", "10 minutes")
       .groupByKey(row => row.getAs[Long]("user_id"))
       .mapGroupsWithState(GroupStateTimeout.EventTimeTimeout())(Mapping.mapStreamingLogsToSessions(sessionTimeout))
 
