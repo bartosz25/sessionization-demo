@@ -62,7 +62,7 @@ object SessionGeneration {
     }
   }
 
-  private[batch] def dedupedAndSortedLogs(logs: Seq[JoinedLog]): Seq[JoinedLog] = {
+  private[memory] def dedupedAndSortedLogs(logs: Seq[JoinedLog]): Seq[JoinedLog] = {
     logs.groupBy(row => row.event_time)
       .mapValues(rows => rows.head)
       .values
