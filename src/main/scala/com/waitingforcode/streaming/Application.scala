@@ -6,6 +6,15 @@ import com.waitingforcode.core.{BatchWriter, SessionIntermediaryState, Visit}
 import org.apache.spark.sql.streaming.{GroupStateTimeout, OutputMode}
 import org.apache.spark.sql.{Dataset, SparkSession, functions}
 
+/**
+  * Streaming implementation for the sessionization problem.
+  * Tips & tricks:
+  * - set `spark.sql.shuffle.partitions` to 1 if you want to explore checkpointed files easier
+  * - set `maxOffsetsPerTrigger` on the data source to something low like 5 if you want to
+  *   observe how sessions and states evolve
+  * - use `.format("console").option("truncate", "false")` in the sink instead of `foreachBatch`
+  *   if you want to observe how your data change in real time
+  */
 object Application {
 
   def main(args: Array[String]): Unit = {
