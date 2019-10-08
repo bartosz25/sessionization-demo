@@ -31,6 +31,7 @@ object Application {
       .option("kafka.bootstrap.servers", kafkaConfiguration.broker)
       .option("client.id", s"sessionization-demo-streaming")
       .option("subscribe", kafkaConfiguration.inputTopic)
+      .option("startingOffsets", kafkaConfiguration.startingOffset)
       .load()
 
     val sessionTimeout = TimeUnit.MINUTES.toMillis(5)

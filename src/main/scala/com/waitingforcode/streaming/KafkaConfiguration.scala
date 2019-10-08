@@ -12,4 +12,4 @@ object KafkaConfiguration {
 
 }
 
-case class KafkaConfiguration(broker: String, inputTopic: String)
+case class KafkaConfiguration(broker: String, inputTopic: String, startingOffset: String = "earliest")

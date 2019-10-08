@@ -1,1 +1,1 @@
-{"broker":  "160.0.0.20:9092", "inputTopic":  "raw_data"}
+{"broker":  "160.0.0.20:9092", "inputTopic":  "raw_data", "startingOffset":  "earliest"}
