@@ -21,21 +21,4 @@ object Mapping {
     }
   }
 
-  def mapStreamingLogsToSessionsProcessingTime(timeoutDurationMs: Long)(key: Long, logs: Iterator[Row],
-                                                          currentState: GroupState[SessionIntermediaryState]): SessionIntermediaryState = {
-    if (currentState.hasTimedOut) {
-      val expiredState = currentState.get.expire
-      println(s"State ${expiredState} expired!")
-      currentState.remove()
-      expiredState
-    } else {
-      val newState = currentState.getOption.map(state => state.updateWithNewLogs(logs, timeoutDurationMs))
-        .getOrElse(SessionIntermediaryState.createNew(logs, timeoutDurationMs))
-      currentState.update(newState)
-      currentState.setTimeoutDuration(timeoutDurationMs)
-      println(s"Creating state for ${key} and ${currentState.getCurrentProcessingTimeMs()}")
-      currentState.get
-    }
-  }
-
 }
