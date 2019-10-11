@@ -8,7 +8,7 @@ class SessionIntermediaryStateConversionTest extends FlatSpec with Matchers {
     userId = 1L, visitedPages = Seq.empty, browser = "Firefox", language = "fr",
     site = "google.com", apiVersion = "v2", expirationTimeMillisUtc = 1000L, isActive = true
   )
-  private val defaultSessionOutput = SessionOutput(
+  private val defaultSessionOutput = SessionOutput(id = 1933572739,
     userId = 1L, browser = "Firefox", language = "fr",
     site = "google.com", apiVersion = "v2", eventTime = "TODO: reformat me", timeOnPageMillis = 0L, page = ""
   )

@@ -6,6 +6,8 @@ import java.time.{Instant, ZoneOffset, ZonedDateTime}
 import com.waitingforcode.core.InputLogMapper.{currentPage, eventTime}
 import org.apache.spark.sql.Row
 
+import scala.util.hashing.MurmurHash3
+
 case class SessionIntermediaryState(userId: Long, visitedPages: Seq[VisitedPage],
                                     browser: String, language: String, site: String,
                                     apiVersion: String,
@@ -15,6 +17,12 @@ case class SessionIntermediaryState(userId: Long, visitedPages: Seq[VisitedPage]
                                     //        an Option[Long] here and use it only in batch?
                                     expirationTimeMillisUtc: Long,
                                     isActive: Boolean) {
+
+  lazy val id = {
+    val firstVisitedPage = visitedPages.head
+    val idKey = s"${firstVisitedPage.eventTime}-${firstVisitedPage.eventTime}-${userId}"
+    MurmurHash3.stringHash(idKey)
+  }
 
   def updateWithNewLogs(newLogs: Iterator[Row], timeoutDurationMs: Long): SessionIntermediaryState = {
     val newVisitedPages = SessionIntermediaryState.mapInputLogsToVisitedPages(newLogs.toSeq)
@@ -42,6 +50,7 @@ case class VisitedPage(eventTime: Long, pageName: String) {
     val eventTimeAsDateTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(eventTime), ZoneOffset.UTC)
 
     SessionOutput(
+      id = session.id,
       userId = session.userId, site = session.site, apiVersion = session.apiVersion,
       browser = session.browser, language = session.language,
       eventTime = VisitedPage.Formatter.format(eventTimeAsDateTime),
