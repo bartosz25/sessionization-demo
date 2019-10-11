@@ -19,7 +19,8 @@ object SessionGeneration {
     val materializedLogs = logs.toSeq
     val firstLog = materializedLogs.head
 
-    val sessions = (Option(InputLogMapper.eventTimeString(firstLog)), Option(SessionIntermediaryState.Mapper.userId(firstLog))) match {
+    // TODO: commit ==> I'm using here a nullable property; Long is definitively not nullable because its default is 0L
+    val sessions = (Option(InputLogMapper.eventTimeString(firstLog)), Option(SessionIntermediaryState.Mapper.apiVersion(firstLog))) match {
       case (Some(_), Some(_)) => generateRestoredSessionWithNewLogs(dedupedAndSortedLogs(materializedLogs), inactivityDurationMs, Some(firstLog))
       case (None, Some(_)) => generateRestoredSessionWithoutNewLogs(materializedLogs, windowUpperBoundMs)
       case (Some(_), None) => generateRestoredSessionWithNewLogs(dedupedAndSortedLogs(materializedLogs), inactivityDurationMs, None)
@@ -32,8 +33,6 @@ object SessionGeneration {
     sessions
   }
 
-  // TODO: expirationTimeMillisUtc is a kind of fake watermark where we allow the logs to arrive at late
-  //       in batch
   private def generateRestoredSessionWithNewLogs(logs: Seq[Row], sessionTimeoutMs: Long, previousSession: Option[Row]): Seq[SessionIntermediaryState] = {
     val generatedSessions = new mutable.ListBuffer[SessionIntermediaryState]()
     var currentSession = previousSession.map(log => SessionIntermediaryState.restoreFromRow(log))
