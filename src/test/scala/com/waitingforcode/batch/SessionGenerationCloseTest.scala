@@ -1,6 +1,5 @@
 package com.waitingforcode.batch
 
-import com.waitingforcode.test.JoinedInputWithRestoredSession
 import org.apache.spark.sql.SparkSession
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 
@@ -8,7 +7,7 @@ class SessionGenerationCloseTest extends FlatSpec with Matchers with BeforeAndAf
 
   private val TestSparkSession = SparkSession.builder()
       .master("local[*]").appName("Test session generation").getOrCreate()
-
+/*
   behavior of "data without input logs and with restored session"
 
   // TODO:
@@ -45,5 +44,5 @@ class SessionGenerationCloseTest extends FlatSpec with Matchers with BeforeAndAf
   it should "create 2 sessions because of too long inactivity time of the first one" in {
 
   }
-
+*/
 }

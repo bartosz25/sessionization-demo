@@ -2,7 +2,7 @@ package com.waitingforcode.core
 
 import org.scalatest.{FlatSpec, Matchers}
 
-class SessionIntermediaryStateTest extends FlatSpec with Matchers {
+class SessionIntermediaryStateConversionTest extends FlatSpec with Matchers {
 
   private val defaultSession = SessionIntermediaryState(
     userId = 1L, visitedPages = Seq.empty, browser = "Firefox", language = "fr",

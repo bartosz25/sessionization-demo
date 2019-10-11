@@ -90,8 +90,6 @@ object SessionIntermediaryState {
     )
   }
 
-  // TODO: apparently we could use Encoders somewhere in the code but I've just read that it's dangerous to use
-  //       see that comment: https://stackoverflow.com/a/32347699/9726075
   def restoreFromRow(row: Row, isActive: Boolean = true) = {
     SessionIntermediaryState(
       userId = Mapper.userId(row), browser = Mapper.browser(row), language = Mapper.language(row),
