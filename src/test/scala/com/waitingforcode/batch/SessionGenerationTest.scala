@@ -1,5 +1,8 @@
 package com.waitingforcode.batch
 
+import java.sql.Timestamp
+
+import com.waitingforcode.test.Mocks
 import org.apache.spark.sql.Row
 import org.mockito.Mockito
 import org.scalatest.{FlatSpec, Matchers}
@@ -31,20 +34,16 @@ class SessionGenerationTest extends FlatSpec with Matchers {
   behavior of "logs dedupe and sort"
 
   it should "dedupe and sort input logs" in {
-    val inputLogs = Seq(inputLog("4"), inputLog("1"), inputLog("2"), inputLog("1"), inputLog("3"))
+    val inputLogs = Seq(Mocks.inputLog("1970-01-01T00:00:40+00:00"),
+      Mocks.inputLog("1970-01-01T00:00:10+00:00"), Mocks.inputLog("1970-01-01T00:00:20+00:00"),
+      Mocks.inputLog("1970-01-01T00:00:10+00:00"), Mocks.inputLog("1970-01-01T00:00:30+00:00"))
 
     val sortedDedupedLogs = SessionGeneration.dedupedAndSortedLogs(inputLogs)
 
     sortedDedupedLogs should have size 4
-    sortedDedupedLogs.map(row => row.getAs[String]("event_time")) should contain inOrderElementsOf(
-      Seq("1", "2", "3", "4")
+    sortedDedupedLogs.map(row => row.getAs[Timestamp]("event_time")) should contain inOrderElementsOf(
+      Seq(new Timestamp(10000L), new Timestamp(20000L), new Timestamp(30000L), new Timestamp(40000L))
     )
-  }
-
-  private def inputLog(eventTime: String): Row = {
-    val mockedRow = Mockito.mock(classOf[Row])
-    Mockito.when(mockedRow.getAs[String]("event_time")).thenReturn(eventTime)
-    mockedRow
   }
 
 }

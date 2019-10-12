@@ -20,7 +20,7 @@ object SessionGeneration {
     val firstLog = materializedLogs.head
 
     // TODO: commit ==> I'm using here a nullable property; Long is definitively not nullable because its default is 0L
-    val sessions = (Option(InputLogMapper.eventTimeString(firstLog)), Option(SessionIntermediaryState.Mapper.apiVersion(firstLog))) match {
+    val sessions = (Option(InputLogMapper.eventTimeTimestamp(firstLog)), Option(SessionIntermediaryState.Mapper.apiVersion(firstLog))) match {
       case (Some(_), Some(_)) => generateRestoredSessionWithNewLogs(dedupedAndSortedLogs(materializedLogs), inactivityDurationMs, Some(firstLog))
       case (None, Some(_)) => generateRestoredSessionWithoutNewLogs(materializedLogs, windowUpperBoundMs)
       case (Some(_), None) => generateRestoredSessionWithNewLogs(dedupedAndSortedLogs(materializedLogs), inactivityDurationMs, None)
@@ -63,11 +63,11 @@ object SessionGeneration {
   }
 
   private[batch] def dedupedAndSortedLogs(logs: Seq[Row]): Seq[Row] = {
-    logs.groupBy(row => InputLogMapper.eventTimeString(row))
+    logs.groupBy(row => InputLogMapper.eventTimeTimestamp(row))
       .mapValues(rows => rows.head)
       .values
       .toSeq
-      .sortBy(row => InputLogMapper.eventTimeString(row))
+      .sortBy(row => InputLogMapper.eventTime(row))
   }
 
 }

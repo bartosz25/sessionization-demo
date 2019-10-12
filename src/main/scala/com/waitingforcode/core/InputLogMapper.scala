@@ -1,6 +1,6 @@
 package com.waitingforcode.core
 
-import java.time.ZonedDateTime
+import java.sql.Timestamp
 
 import org.apache.spark.sql.Row
 
@@ -13,11 +13,11 @@ object InputLogMapper {
   def currentPage(log: Row): String = page(log).getAs[String]("current")
 
   def eventTime(log: Row): Long = {
-    val eventTime = ZonedDateTime.parse(eventTimeString(log))
+    val eventTime = eventTimeTimestamp(log)
     eventTime.toInstant.toEpochMilli
   }
 
-  def eventTimeString(log: Row): String = log.getAs[String]("event_time")
+  def eventTimeTimestamp(log: Row): Timestamp = log.getAs[Timestamp]("event_time")
 
   private def technical(log: Row): Row = log.getAs[Row]("technical")
 

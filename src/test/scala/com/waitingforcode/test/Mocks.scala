@@ -1,5 +1,8 @@
 package com.waitingforcode.test
 
+import java.sql.Timestamp
+import java.time.ZonedDateTime
+
 import com.waitingforcode.core.{SessionIntermediaryState, VisitedPage}
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.streaming.GroupState
@@ -9,11 +12,11 @@ import org.mockito.stubbing.Answer
 
 object Mocks {
 
-  // TODO: use this one for session generation test
   def inputLog(eventTime: String, page: String = "test.html", sourceSite: String = "http://",
                apiVersion: String = "1.0", language: String = "en", userId: Long = 30L, browser: String = "Firefox"): Row = {
+    val timestamp = ZonedDateTime.parse(eventTime).toInstant.toEpochMilli
     val mockedRow = Mockito.mock(classOf[Row])
-    Mockito.when(mockedRow.getAs[String]("event_time")).thenReturn(eventTime)
+    Mockito.when(mockedRow.getAs[Timestamp]("event_time")).thenReturn(new Timestamp(timestamp))
     Mockito.when(mockedRow.getAs[Long]("user_id")).thenReturn(userId)
     val pageRow = Mockito.mock(classOf[Row])
     Mockito.when(mockedRow.getAs[Row]("page")).thenReturn(pageRow)
