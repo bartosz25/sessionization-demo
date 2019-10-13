@@ -50,5 +50,5 @@ I experienced that `sbt` doesn't work perfect in every configuration, like the o
 testing, I decided to use more classical Maven.
 
 ## Further reading
-* [Spark+AI Summit 2019 presentation](https://databricks.com/session_eu19/using-apache-spark-to-solve-sessionization-problem-in-batch-and-streaming)
-* [blog posts on waitingforcode.com](https://www.waitingforcode.com/tags/spark-summit-2019-talk-notes)
+* <a href="https://databricks.com/session_eu19/using-apache-spark-to-solve-sessionization-problem-in-batch-and-streaming" target="_blank">Spark+AI Summit 2019 presentation</a>
+* <a href="https://www.waitingforcode.com/tags/spark-summit-2019-talk-notes" target="_blank">blog posts on waitingforcode.com</a>
