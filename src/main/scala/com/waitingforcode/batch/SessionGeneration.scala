@@ -20,16 +20,19 @@ object SessionGeneration {
     val firstLog = materializedLogs.head
 
     val sessions = (Option(InputLogMapper.eventTimeTimestamp(firstLog)), Option(SessionIntermediaryState.Mapper.apiVersion(firstLog))) match {
-      case (Some(_), Some(_)) => generateRestoredSessionWithNewLogs(dedupedAndSortedLogs(materializedLogs), inactivityDurationMs, Some(firstLog))
+      case (Some(_), Some(_)) => generateRestoredSessionWithNewLogs(dedupedAndSortedLogs(materializedLogs),
+        inactivityDurationMs, Some(firstLog), windowUpperBoundMs)
       case (None, Some(_)) => generateRestoredSessionWithoutNewLogs(materializedLogs, windowUpperBoundMs)
-      case (Some(_), None) => generateRestoredSessionWithNewLogs(dedupedAndSortedLogs(materializedLogs), inactivityDurationMs, None)
+      case (Some(_), None) => generateRestoredSessionWithNewLogs(dedupedAndSortedLogs(materializedLogs),
+        inactivityDurationMs, None, windowUpperBoundMs)
       case (None, None) => throw new IllegalStateException("Session generation when there is not input nor previous " +
         "session logs should never happen")
     }
     sessions
   }
 
-  private def generateRestoredSessionWithNewLogs(logs: Seq[Row], sessionTimeoutMs: Long, previousSession: Option[Row]): Seq[SessionIntermediaryState] = {
+  private def generateRestoredSessionWithNewLogs(logs: Seq[Row], sessionTimeoutMs: Long,
+                                                 previousSession: Option[Row], windowUpperBoundMs: Long): Seq[SessionIntermediaryState] = {
     val generatedSessions = new mutable.ListBuffer[SessionIntermediaryState]()
     var currentSession = previousSession.map(log => SessionIntermediaryState.restoreFromRow(log))
     for (log <- logs) {
@@ -42,7 +45,14 @@ object SessionGeneration {
         currentSession = Some(SessionIntermediaryState.createNew(Iterator(log), sessionTimeoutMs))
       }
     }
-    currentSession.foreach(sessionState => generatedSessions.append(sessionState))
+    currentSession.foreach(sessionState => {
+      val sessionToAppend = if (sessionState.expirationTimeMillisUtc < windowUpperBoundMs) {
+        sessionState.expire
+      } else {
+        sessionState
+      }
+      generatedSessions.append(sessionToAppend)
+    })
     generatedSessions
 
   }

@@ -21,7 +21,8 @@ class SessionGenerationPreviousSessionNewLogsTest extends FlatSpec with Matchers
       Some(Mocks.inputLog("1970-01-01T00:00:25+00:00", "d.html")), Some(sessionToRestore)
     )
 
-    val sessions = SessionGeneration.generate(15000L, 60000L)(30L, Iterator(joinedLog1, joinedLog2))
+    // upperBound = 39 sec, before the expiration time for the last session
+    val sessions = SessionGeneration.generate(15000L, 30000L)(30L, Iterator(joinedLog1, joinedLog2))
     val sessionsPerPage = sessions.groupBy(session => session.visitedPages.head.pageName)
       .mapValues(mappedSessions => mappedSessions.head)
     sessions should have size 2
@@ -51,7 +52,8 @@ class SessionGenerationPreviousSessionNewLogsTest extends FlatSpec with Matchers
       Some(Mocks.inputLog("1970-01-01T00:00:25+00:00", "d.html")), Some(sessionToRestore)
     )
 
-    val sessions = SessionGeneration.generate(15000L, 60000L)(30L, Iterator(joinedLog1, joinedLog2))
+    // upperBound = 39 sec, before the expiration time for the last session
+    val sessions = SessionGeneration.generate(15000L, 39000L)(30L, Iterator(joinedLog1, joinedLog2))
 
     sessions should have size 1
     new SessionIntermediaryStateAssertions(sessions.head)
@@ -94,6 +96,34 @@ class SessionGenerationPreviousSessionNewLogsTest extends FlatSpec with Matchers
     new SessionIntermediaryStateAssertions(sessionsPerPage("d.html"))
       .expectedPages(Seq(VisitedPage(45000L, "d.html")))
       .expiringAt(60000L)
+      .validate()
+  }
+
+  "session from previous window" should "include new logs when the first log is before session's expiration time and " +
+    "generate an expired session because of the window's upper bound" in {
+    val visitedPages = Seq(
+      VisitedPage(3000L, "a.html"), VisitedPage(4000L, "b.html")
+    )
+    val sessionToRestore = Mocks.session(
+      userId = 30L, expirationTimeMillisUtc = 20000L, visitedPages = visitedPages
+    )
+    val joinedLog1 = Mocks.inputLogsWithSession(
+      Some(Mocks.inputLog("1970-01-01T00:00:15+00:00", "c.html")), Some(sessionToRestore)
+    )
+    val joinedLog2 = Mocks.inputLogsWithSession(
+      Some(Mocks.inputLog("1970-01-01T00:00:25+00:00", "d.html")), Some(sessionToRestore)
+    )
+
+    // upperBound = 60 sec, so the last session will expire
+    val sessions = SessionGeneration.generate(15000L, 60000L)(30L, Iterator(joinedLog1, joinedLog2))
+
+    sessions should have size 1
+    new SessionIntermediaryStateAssertions(sessions.head)
+      .expectedPages(Seq(VisitedPage(3000L, "a.html"), VisitedPage(4000L, "b.html"),
+        VisitedPage(15000L, "c.html"), VisitedPage(25000L, "d.html")
+      ))
+      .expired()
+      .expiringAt(40000L)
       .validate()
   }
 }
