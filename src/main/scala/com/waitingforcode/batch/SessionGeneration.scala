@@ -19,7 +19,6 @@ object SessionGeneration {
     val materializedLogs = logs.toSeq
     val firstLog = materializedLogs.head
 
-    // TODO: commit ==> I'm using here a nullable property; Long is definitively not nullable because its default is 0L
     val sessions = (Option(InputLogMapper.eventTimeTimestamp(firstLog)), Option(SessionIntermediaryState.Mapper.apiVersion(firstLog))) match {
       case (Some(_), Some(_)) => generateRestoredSessionWithNewLogs(dedupedAndSortedLogs(materializedLogs), inactivityDurationMs, Some(firstLog))
       case (None, Some(_)) => generateRestoredSessionWithoutNewLogs(materializedLogs, windowUpperBoundMs)
@@ -27,25 +26,20 @@ object SessionGeneration {
       case (None, None) => throw new IllegalStateException("Session generation when there is not input nor previous " +
         "session logs should never happen")
     }
-    // TODO: must to deal here with expiration datetime because the logs may be written unordered and we don't
-    // want to revoke the sessions. Instead it's easier to wait and since we're doing batch, I suppose that latency
-    // is not the first concern !
     sessions
   }
 
   private def generateRestoredSessionWithNewLogs(logs: Seq[Row], sessionTimeoutMs: Long, previousSession: Option[Row]): Seq[SessionIntermediaryState] = {
     val generatedSessions = new mutable.ListBuffer[SessionIntermediaryState]()
     var currentSession = previousSession.map(log => SessionIntermediaryState.restoreFromRow(log))
-    // TODO: during the talk say that it could also be solved with plain SQL joins but I didn't had enough
-    // time to prove that and after all, the code gives a little bit more flexibility for that
     for (log <- logs) {
       if (currentSession.isEmpty) {
-        currentSession = Some(SessionIntermediaryState.createNew(Iterator(log), sessionTimeoutMs)) // TODO: change too
+        currentSession = Some(SessionIntermediaryState.createNew(Iterator(log), sessionTimeoutMs))
       } else if (currentSession.get.expirationTimeMillisUtc >= InputLogMapper.eventTime(log)) {
-        currentSession = Some(currentSession.get.updateWithNewLogs(Iterator(log), sessionTimeoutMs)) // TODO: change
+        currentSession = Some(currentSession.get.updateWithNewLogs(Iterator(log), sessionTimeoutMs))
       } else if (currentSession.get.expirationTimeMillisUtc < InputLogMapper.eventTime(log)) {
         currentSession.foreach(sessionState => generatedSessions.append(sessionState.expire))
-        currentSession = Some(SessionIntermediaryState.createNew(Iterator(log), sessionTimeoutMs)) // TODO: change too
+        currentSession = Some(SessionIntermediaryState.createNew(Iterator(log), sessionTimeoutMs))
       }
     }
     currentSession.foreach(sessionState => generatedSessions.append(sessionState))
