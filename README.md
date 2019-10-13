@@ -27,6 +27,28 @@ generation for *H* can only start if the generation for *H-1* terminated correct
 files should be partitioned by event time. Thanks to that, we won't need to filter out the events happened during last 
 24 hours for the last generation of the day.
 
+## Tests
+To test the application you have to generate some test data. Both streaming and batch versions use 
+my [data generator](https://github.com/bartosz25/data-generator) simulating user visits on a website.
+### Streaming
+1. Go to your working directory
+2. `git clone git@github.com:bartosz25/data-generator.git`
+3. Follow the README from https://github.com/bartosz25/data-generator/tree/master/examples/kafka
+4. Start streaming application `com.waitingforcode.streaming.Application "/tmp/sessions-demo" "/home/bartosz/workspace/sessionization-demo/configuration/kafka_configuration.json"`, an IntelliJ's example:
+![IntelliJ configuration for streaming](./doc/intellij_streaming.png)
+
+### Batch
+1. Go to your working directory
+2. `git clone git@github.com:bartosz25/data-generator.git`
+3. Follow the README from https://github.com/bartosz25/data-generator/tree/master/examples/local_filesystem
+4. Start batch application `com.waitingforcode.batch.Application /home/bartosz/tmp/test_generator/2019/08/11/09  "" "2019-08-11 09"`
+where "/home/bartosz/tmp/test_generator/2019/08/11/09" is the input directory, "" previous session's directory and "2019-08-11 09" processed time
+![IntelliJ configuration for batch](./doc/intellij_batch.png)
+
 ## Why Maven?
 I experienced that `sbt` doesn't work perfect in every configuration, like the one behind a corporate proxy. To simplify
 testing, I decided to use more classical Maven.
+
+## Further reading
+* [Spark+AI Summit 2019 presentation](https://databricks.com/session_eu19/using-apache-spark-to-solve-sessionization-problem-in-batch-and-streaming)
+* [blog posts on waitingforcode.com](https://www.waitingforcode.com/tags/spark-summit-2019-talk-notes)
