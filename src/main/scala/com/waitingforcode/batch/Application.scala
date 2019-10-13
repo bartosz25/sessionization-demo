@@ -1,6 +1,6 @@
 package com.waitingforcode.batch
 
-import java.time.LocalDateTime
+import java.time.{LocalDateTime, ZoneOffset}
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
 
@@ -23,15 +23,14 @@ object Application {
     val partitionDir = jobExecutionTime.format(DateTimeFormatter.ofPattern("yyyy/MM/dd/HH"))
 
     val previousSessions = DataLoader.loadPreviousWindowSessions(sparkSession, previousSessionsDir)
-
     val sessionsInWindow = sparkSession.read.schema(Visit.Schema).json(inputDir)
 
-    val windowUpperBound = 1000L // TODO: resolve from the input parameter
+    val windowUpperBound = jobExecutionTime.withMinute(59).withSecond(59).toInstant(ZoneOffset.UTC).toEpochMilli
+    println(s"For upper bound=${windowUpperBound} (${jobExecutionTime.withMinute(59).withSecond(59).toInstant(ZoneOffset.UTC)})")
     val joinedData = previousSessions.join(sessionsInWindow,
       sessionsInWindow("user_id") === previousSessions("userId"), "fullouter")
       .groupByKey(log => SessionGeneration.resolveGroupByKey(log))
       .flatMapGroups(SessionGeneration.generate(TimeUnit.MINUTES.toMillis(5), windowUpperBound))
-
 
     joinedData.cache()
 
@@ -43,7 +42,7 @@ object Application {
     // If you keep everything in place, you probably gain a little bit performance because you will avoid
     // to read data from disk
     // coalesce --> can be useful to store data that will be loaded to other stores
-    BatchWriter.writeDataset(joinedData, partitionDir)
+    BatchWriter.writeDataset(joinedData, s"/tmp/sessions-output/${partitionDir}")
 
     val end = System.currentTimeMillis()
     println(s"Executed withing ${end - start} ms")
