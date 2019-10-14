@@ -7,7 +7,7 @@ object Visit {
   val Schema = new StructBuilder()
     .withRequiredFields(
       Map(
-        "visit_id" -> fields.long, "user_id" -> fields.integer, "event_time" -> fields.string,
+        "user_id" -> fields.long, "event_time" -> fields.timestamp,
         "page" -> fields.newStruct.withRequiredFields(Map("current" -> fields.string))
           .withOptionalFields(Map("previous" -> fields.string)).toField,
         "source" -> fields.newStruct.withRequiredFields(Map(
@@ -26,6 +26,7 @@ object Visit {
     ).buildSchema
 
 }
+
 
 class StructBuilder() {
 
@@ -54,11 +55,13 @@ object fields {
   private def baseField(fieldType: DataType)(fieldName: String, nullable: Boolean) =
     new StructField(fieldName, fieldType, nullable)
   def string = baseField(StringType) _
+  def timestamp = baseField(TimestampType) _
   def array(fieldType: DataType, nullableContent: Boolean) = baseField(ArrayType(fieldType, nullableContent)) _
   def struct(fields: Array[StructField]) = baseField(StructType(fields)) _
   def long = baseField(LongType) _
   def integer = baseField(IntegerType) _
   def double = baseField(DoubleType) _
+  def boolean = baseField(BooleanType) _
 
   def newStruct = new StructBuilder()
 
