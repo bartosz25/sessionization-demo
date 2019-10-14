@@ -70,4 +70,4 @@ your tests, I decided to use more classical Maven builder tool - even though I a
 
 ## Further reading
 * <a href="https://databricks.com/session_eu19/using-apache-spark-to-solve-sessionization-problem-in-batch-and-streaming" target="_blank">Spark+AI Summit 2019 presentation</a>
-* <a href="https://www.waitingforcode.com/tags/spark-summit-2019-talk-notes" target="_blank">blog posts on waitingforcode.com</a>
+* <a href="https://www.waitingforcode.com/tags/spark-ai-summit-europe-2019-articles" target="_blank">Spark AI Summit Europe 2019 blog posts on waitingforcode.com</a>
