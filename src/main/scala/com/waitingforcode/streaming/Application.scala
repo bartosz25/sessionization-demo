@@ -34,7 +34,7 @@ object Application {
       .option("startingOffsets", kafkaConfiguration.startingOffset)
       .load()
 
-    val sessionTimeout = TimeUnit.MINUTES.toMillis(5)
+    val sessionTimeout = TimeUnit.MINUTES.toMillis(20)
     val query = dataFrame.selectExpr("CAST(value AS STRING)")
       .select(functions.from_json($"value", Visit.Schema).as("data"))
       .select($"data.*")
