@@ -16,7 +16,7 @@ object Mapping {
       val newState = currentState.getOption.map(state => state.updateWithNewLogs(logs, timeoutDurationMs))
         .getOrElse(SessionIntermediaryState.createNew(logs, timeoutDurationMs))
       currentState.update(newState)
-      currentState.setTimeoutTimestamp(currentState.getCurrentWatermarkMs() + timeoutDurationMs)
+      currentState.setTimeoutTimestamp(newState.expirationTimeMillisUtc)
       currentState.get
     }
   }

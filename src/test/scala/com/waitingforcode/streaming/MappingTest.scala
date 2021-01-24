@@ -30,7 +30,6 @@ class MappingTest extends FlatSpec with Matchers {
       expirationTimeMillisUtc = 5000L, isActive = true
     )
     val state = Mocks.groupState(stateBeforeUpdate, false)
-    Mockito.when(state.getCurrentWatermarkMs).thenReturn(3000L)
     val updatedStateCaptor = ArgumentCaptor.forClass(classOf[SessionIntermediaryState])
     val watermarkCaptor = ArgumentCaptor.forClass(classOf[Long])
 
@@ -48,13 +47,12 @@ class MappingTest extends FlatSpec with Matchers {
       VisitedPage(25000L, "a.html"), VisitedPage(35000L, "b.html")))
     newState.isActive shouldBe true
     Mockito.verify(state).setTimeoutTimestamp(watermarkCaptor.capture())
-    watermarkCaptor.getValue shouldEqual 8000L
+    watermarkCaptor.getValue shouldEqual 40000L
     Mockito.verify(state).update(org.mockito.Matchers.any(classOf[SessionIntermediaryState]))
   }
 
   it should "create a new state for new input logs" in {
     val state = Mocks.groupState(null, false)
-    Mockito.when(state.getCurrentWatermarkMs).thenReturn(3000L)
     val updatedStateCaptor = ArgumentCaptor.forClass(classOf[SessionIntermediaryState])
     val watermarkCaptor = ArgumentCaptor.forClass(classOf[Long])
 
@@ -71,7 +69,7 @@ class MappingTest extends FlatSpec with Matchers {
     newState.visitedPages should contain allOf (VisitedPage(25000L, "a.html"), VisitedPage(35000L, "b.html"))
     newState.isActive shouldBe true
     Mockito.verify(state).setTimeoutTimestamp(watermarkCaptor.capture())
-    watermarkCaptor.getValue shouldEqual 8000L
+    watermarkCaptor.getValue shouldEqual 40000L
     Mockito.verify(state).update(org.mockito.Matchers.any(classOf[SessionIntermediaryState]))
   }
 
